@@ -1,4 +1,8 @@
-=== 0.2.0 / 2010-12-06
+=== 0.2.0 / 2010-12-07
 
-Initial public alpha release. Spun activerecord-spatialite-adapter off from the core rgeo gem.
+* Initial public alpha release. Spun activerecord-spatialite-adapter off from the core rgeo gem.
+* You can now set the factory for a specific column by name.
+* Dropping a table that had spatial indexes tied to it didn't remove the index tables. Fixed.
+* You can now remove spatial indexes by name.
+
 For earlier history, see the History file for the rgeo gem.

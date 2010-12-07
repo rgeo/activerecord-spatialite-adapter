@@ -38,7 +38,25 @@ require 'rgeo/active_record'
 require 'active_record/connection_adapters/sqlite3_adapter'
 
 
+# :stopdoc:
+
+module Arel
+  module Visitors
+    VISITORS['spatialite'] = ::Arel::Visitors::SQLite
+  end
+end
+
+# :startdoc:
+
+
+# The activerecord-spatialite-adapter gem installs the *spatialite*
+# connection adapter into ActiveRecord.
+
 module ActiveRecord
+  
+  
+  # ActiveRecord looks for the spatialite_connection factory method in
+  # this class.
   
   class Base
     
@@ -173,12 +191,15 @@ module ActiveRecord
         execute create_sql_
         
         table_definition_.spatial_columns.each do |col_|
-          execute("SELECT AddGeometryColumn('#{quote_string(table_name_)}', '#{quote_string(col_.name)}', #{col_.srid}, '#{quote_string(col_.type.to_s.gsub('_','').upcase)}', 'XY', #{col_.null ? 0 : 1})")
+          execute("SELECT AddGeometryColumn('#{quote_string(table_name_)}', '#{quote_string(col_.name.to_s)}', #{col_.srid}, '#{quote_string(col_.type.to_s.gsub('_','').upcase)}', 'XY', #{col_.null ? 0 : 1})")
         end
       end
       
       
       def drop_table(table_name_, options_={})
+        spatial_indexes(table_name_).each do |index_|
+          remove_index(table_name_, :spatial => true, :column => index_.columns[0])
+        end
         execute("DELETE from geometry_columns where f_table_name='#{quote_string(table_name_.to_s)}'")
         super
       end
@@ -215,20 +236,30 @@ module ActiveRecord
       
       def remove_index(table_name_, options_={})
         if options_[:spatial]
-          column_ = options_[:column]
-          unless column_
-            raise ::ArgumentError, "You need to specify a column to remove a spatial index."
-          end
           table_name_ = table_name_.to_s
-          column_ = column_.to_s
+          column_ = options_[:column]
+          if column_
+            column_ = column_[0] if column_.kind_of?(::Array)
+            column_ = column_.to_s
+          else
+            index_name_ = options_[:name]
+            unless index_name_
+              raise ::ArgumentError, "You need to specify a column or index name to remove a spatial index."
+            end
+            if index_name_ =~ /^idx_#{table_name_}_(\w+)$/
+              column_ = $1
+            else
+              raise ::ArgumentError, "Unknown spatial index name: #{index_name_.inspect}."
+            end
+          end
           spatial_info_ = spatial_column_info(table_name_)
           unless spatial_info_[column_]
-            raise ::ArgumentError, "Can't remove spatial index because column '#{column_name_}' in table '#{table_name_}' is not a geometry column"
+            raise ::ArgumentError, "Can't remove spatial index because column '#{column_}' in table '#{table_name_}' is not a geometry column"
           end
           index_name_ = "idx_#{table_name_}_#{column_}"
           has_index_ = select_value("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='#{quote_string(index_name_)}'").to_i > 0
           unless has_index_
-            raise ::ArgumentError, "Spatial index not present on table '#{table_name_}', column '#{column_name_}'"
+            raise ::ArgumentError, "Spatial index not present on table '#{table_name_}', column '#{column_}'"
           end
           execute("SELECT DisableSpatialIndex('#{quote_string(table_name_)}', '#{quote_string(column_)}')")
           execute("DROP TABLE #{quote_table_name(index_name_)}")
@@ -331,12 +362,12 @@ module ActiveRecord
         
         
         def type_cast(value_)
-          type == :geometry ? SpatialColumn.string_to_geometry(value_, @ar_class, @srid) : super
+          type == :geometry ? SpatialColumn.convert_to_geometry(value_, @ar_class, name, @srid) : super
         end
         
         
         def type_cast_code(var_name_)
-          type == :geometry ? "::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::SpatialColumn.string_to_geometry(#{var_name_}, self.class, #{@srid})" : super
+          type == :geometry ? "::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::SpatialColumn.convert_to_geometry(#{var_name_}, self.class, #{name.inspect}, #{@srid})" : super
         end
         
         
@@ -348,19 +379,20 @@ module ActiveRecord
         end
         
         
-        def self.string_to_geometry(str_, ar_class_, column_srid_)
-          case str_
+        def self.convert_to_geometry(input_, ar_class_, column_name_, column_srid_)
+          case input_
           when ::RGeo::Feature::Geometry
-            str_
+            factory_ = ar_class_.rgeo_factory_for_column(column_name_, :srid => column_srid_)
+            ::RGeo::Feature.cast(input_, factory_)
           when ::String
-            if str_.length == 0
+            if input_.length == 0
               nil
             else
-              factory_generator_ = ar_class_.rgeo_factory_generator
-              if str_[0,1] == "\x00"
-                NativeFormatParser.new(factory_generator_).parse(str_) rescue nil
+              factory_ = ar_class_.rgeo_factory_for_column(column_name_, :srid => column_srid_)
+              if input_[0,1] == "\x00"
+                NativeFormatParser.new(factory_).parse(input_) rescue nil
               else
-                ::RGeo::WKRep::WKTParser.new(factory_generator_.call(:srid => column_srid_), :support_ewkt => true).parse(str_)
+                ::RGeo::WKRep::WKTParser.new(factory_, :support_ewkt => true).parse(input_)
               end
             end
           else
@@ -375,15 +407,14 @@ module ActiveRecord
       class NativeFormatParser  # :nodoc:
         
         
-        def initialize(factory_generator_)
-          @factory_generator = factory_generator_
+        def initialize(factory_)
+          @factory = factory_
         end
         
         
         def parse(data_)
           @little_endian = data_[1,1] == "\x01"
           srid_ = data_[2,4].unpack(@little_endian ? 'V' : 'N').first
-          @cur_factory = @factory_generator.call(:srid => srid_)
           begin
             _start_scanner(data_)
             obj_ = _parse_object(false)
@@ -401,21 +432,21 @@ module ActiveRecord
           case type_code_
           when 1
             coords_ = _get_doubles(2)
-            @cur_factory.point(*coords_)
+            @factory.point(*coords_)
           when 2
             _parse_line_string
           when 3
             interior_rings_ = (1.._get_integer).map{ _parse_line_string }
-            exterior_ring_ = interior_rings_.shift || @cur_factory.linear_ring([])
-            @cur_factory.polygon(exterior_ring_, interior_rings_)
+            exterior_ring_ = interior_rings_.shift || @factory.linear_ring([])
+            @factory.polygon(exterior_ring_, interior_rings_)
           when 4
-            @cur_factory.multi_point((1.._get_integer).map{ _parse_object(1) })
+            @factory.multi_point((1.._get_integer).map{ _parse_object(1) })
           when 5
-            @cur_factory.multi_line_string((1.._get_integer).map{ _parse_object(2) })
+            @factory.multi_line_string((1.._get_integer).map{ _parse_object(2) })
           when 6
-            @cur_factory.multi_polygon((1.._get_integer).map{ _parse_object(3) })
+            @factory.multi_polygon((1.._get_integer).map{ _parse_object(3) })
           when 7
-            @cur_factory.collection((1.._get_integer).map{ _parse_object(true) })
+            @factory.collection((1.._get_integer).map{ _parse_object(true) })
           else
             raise ::RGeo::Error::ParseError, "Unknown type value: #{type_code_}."
           end
@@ -425,7 +456,7 @@ module ActiveRecord
         def _parse_line_string
           count_ = _get_integer
           coords_ = _get_doubles(2 * count_)
-          @cur_factory.line_string((0...count_).map{ |i_| @cur_factory.point(*coords_[2*i_,2]) })
+          @factory.line_string((0...count_).map{ |i_| @factory.point(*coords_[2*i_,2]) })
         end
         
         

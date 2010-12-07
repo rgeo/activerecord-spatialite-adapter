@@ -114,6 +114,9 @@ module RGeo
                 t_.index([:latlon], :spatial => true)
               end
               assert(klass_.connection.spatial_indexes(:spatial_test).last.spatial)
+              assert_equal(1, klass_.connection.select_value("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='idx_spatial_test_latlon'").to_i)
+              klass_.connection.drop_table(:spatial_test)
+              assert_equal(0, klass_.connection.select_value("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='idx_spatial_test_latlon'").to_i)
             end
             
             
@@ -177,6 +180,29 @@ module RGeo
               assert_equal(::RGeo::Feature::Point, cols_[-2].geometric_type)
               assert_equal(4326, cols_[-2].srid)
               assert_nil(cols_[-1].geometric_type)
+            end
+            
+            
+            def test_readme_example
+              klass_ = create_ar_class
+              klass_.connection.create_table(:spatial_test) do |t_|
+                t_.column(:latlon, :point)
+                t_.line_string(:path)
+                t_.geometry(:shape)
+              end
+              klass_.connection.change_table(:spatial_test) do |t_|
+                t_.index(:latlon, :spatial => true)
+              end
+              klass_.class_eval do
+                self.rgeo_factory_generator = ::RGeo::Geos.method(:factory)
+                set_rgeo_factory_for_column(:latlon, ::RGeo::Geographic.spherical_factory)
+              end
+              rec_ = klass_.new
+              rec_.latlon = 'POINT(-122 47)'
+              loc_ = rec_.latlon
+              assert_equal(47, loc_.latitude)
+              rec_.shape = loc_
+              assert_equal(true, ::RGeo::Geos.is_geos?(rec_.shape))
             end
             
             
