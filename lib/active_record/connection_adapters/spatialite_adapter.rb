@@ -152,7 +152,7 @@ module ActiveRecord
         names_ = select_values("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'idx_#{quote_string(table_name_)}_%' AND rootpage=0") || []
         names_.map do |name_|
           col_name_ = name_.sub("idx_#{table_name_}_", '')
-          ::RGeo::ActiveRecord::Common::IndexDefinition.new(table_name_, name_, false, [col_name_], [], true)
+          ::RGeo::ActiveRecord::SpatialIndexDefinition.new(table_name_, name_, false, [col_name_], [], true)
         end
       end
       
@@ -301,7 +301,7 @@ module ActiveRecord
         
         def initialize(name_, default_, sql_type_=nil, null_=true)
           super(name_, default_, sql_type_, null_)
-          @geometric_type = ::RGeo::ActiveRecord::Common.geometric_type_from_name(sql_type_)
+          @geometric_type = ::RGeo::ActiveRecord.geometric_type_from_name(sql_type_)
           @ar_class = ::ActiveRecord::Base
           @srid = 0
         end
