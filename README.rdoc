@@ -1,10 +1,11 @@
-== SpatiaLite ActiveRecord Adapter
+== SpatiaLite \ActiveRecord Adapter
 
-The SpatiaLite ActiveRecord Adapter is an ActiveRecord connection adapter
-based on the standard sqlite3 adapter. It extends the stock adapter to
-provide support for spatial extensions using SpatiaLite, using the RGeo
-library to represent spatial data in Ruby. Like the standard sqlite3
-adapter, this adapter requires the sqlite3-ruby gem.
+The SpatiaLite \ActiveRecord Adapter is an \ActiveRecord connection
+adapter based on the standard sqlite3 adapter. It extends the standard
+adapter to provide support for spatial extensions using SpatiaLite, using
+the {RGeo}[http://github.com/dazuma/rgeo] library to represent spatial
+data in Ruby. Like the standard sqlite3 adapter, this adapter requires
+the sqlite3-ruby gem.
 
 === Usage
 
@@ -35,7 +36,7 @@ Examples:
    t.index :latlon, :spatial => true
  end
 
-When this adapter is in use, spatial attributes in your ActiveRecord
+When this adapter is in use, spatial attributes in your \ActiveRecord
 objects will have RGeo geometry values. You can set spatial attributes
 either to RGeo geometry objects, or to strings in WKT (well-known text)
 format, which the adapter will automatically convert to geometry objects.
@@ -44,13 +45,13 @@ To specify the RGeo geometry factory, you can either set an explicit
 factory for a column, or provide a factory generator that will yield the
 appropriate factory for the table's spatial columns based on the value.
 For the former, call the set_rgeo_factory_for_column class method on your
-ActiveRecord class. For the latter, set the rgeo_factory_generator class
+\ActiveRecord class. For the latter, set the rgeo_factory_generator class
 attribute. This generator should understand at least the <tt>:srid</tt>
 option, which will be provided based on the column's specified SRID. Note
 that the spatialite adapter does not currently support Z or M coordinates,
 as it's unclear to me whether SpatiaLite itself supports them. The
 set_rgeo_factory_for_column and rgeo_factory_generator methods are
-actually implemented and documented in the <b>rgeo-activerecord</b> gem.
+actually implemented and documented in the "rgeo-activerecord" gem.
 
 Examples, given the spatial table defined above:
 
@@ -81,7 +82,8 @@ This adapter has the following requirements:
 
 * Ruby 1.8.7 or later. Ruby 1.9.2 or later preferred.
 * SpatiaLite 2.3 or later (2.4 recommended).
-* ActiveRecord 3.0.3 or later. Earlier versions will not work.
+* \ActiveRecord 3.0.3 or later. Earlier versions will not work.
+* rgeo gem 0.2.0 or later.
 * rgeo-activerecord gem 0.2.0 or later.
 * sqlite3 gem 1.3 or later.
 
