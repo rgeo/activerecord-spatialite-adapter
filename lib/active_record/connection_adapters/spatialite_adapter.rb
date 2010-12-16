@@ -143,6 +143,11 @@ module ActiveRecord
       end
       
       
+      def srs_database_columns
+        {:name_column => 'ref_sys_name', :proj4text_column => 'proj4text', :auth_name_column => 'auth_name', :auth_srid_column => 'auth_srid'}
+      end
+      
+      
       def quote(value_, column_=nil)
         if ::RGeo::Feature::Geometry.check_type(value_)
           "GeomFromWKB(X'#{::RGeo::WKRep::WKBGenerator.new(:hex_format => true).generate(value_)}', #{value_.srid})"
