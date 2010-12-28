@@ -42,7 +42,23 @@ require 'active_record/connection_adapters/sqlite3_adapter'
 
 module Arel
   module Visitors
-    VISITORS['spatialite'] = ::Arel::Visitors::SQLite
+    
+    class SpatiaLite < SQLite
+      
+      FUNC_MAP = {
+        'ST_WKTToSQL' => 'GeomFromText',
+      }
+      
+      include ::RGeo::ActiveRecord::SpatialToSql
+      
+      def st_func(standard_name_)
+        FUNC_MAP[standard_name_] || standard_name_
+      end
+      
+    end
+    
+    VISITORS['spatialite'] = ::Arel::Visitors::SpatiaLite
+    
   end
 end
 
