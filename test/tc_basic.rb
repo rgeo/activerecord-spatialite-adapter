@@ -76,6 +76,11 @@ module RGeo
             end
             
             
+            def test_version
+              assert_not_nil(::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::VERSION)
+            end
+            
+            
             def test_meta_data_present
               result_ = DEFAULT_AR_CLASS.connection.select_value("SELECT COUNT(*) FROM spatial_ref_sys").to_i
               assert_not_equal(0, result_)
@@ -203,32 +208,6 @@ module RGeo
               assert_equal(47, loc_.latitude)
               rec_.shape = loc_
               assert_equal(true, ::RGeo::Geos.is_geos?(rec_.shape))
-            end
-            
-            
-            def test_query_point
-              klass_ = populate_ar_class(:latlon_point)
-              obj_ = klass_.new
-              obj_.latlon = @factory.point(1, 2)
-              obj_.save!
-              id_ = obj_.id
-              obj2_ = klass_.where(:latlon => @factory.multi_point([@factory.point(1, 2)])).first
-              assert_equal(id_, obj2_.id)
-              obj3_ = klass_.where(:latlon => @factory.multi_point([@factory.point(2, 2)])).first
-              assert_nil(obj3_)
-            end
-            
-            
-            def test_query_point_wkt
-              klass_ = populate_ar_class(:latlon_point)
-              obj_ = klass_.new
-              obj_.latlon = @factory.point(1, 2)
-              obj_.save!
-              id_ = obj_.id
-              obj2_ = klass_.where(:latlon => 'POINT(1 2)').first
-              assert_equal(id_, obj2_.id)
-              obj3_ = klass_.where(:latlon => 'POINT(2 2)').first
-              assert_nil(obj3_)
             end
             
             

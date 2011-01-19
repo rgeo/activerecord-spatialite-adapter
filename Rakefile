@@ -62,7 +62,7 @@ module RAKEFILE
   PRODUCT_SUMMARY = "An ActiveRecord adapter for SpatiaLite, based on RGeo."
   PRODUCT_DESCRIPTION = "This is an ActiveRecord connection adapter for the SpatiaLite extension to the Sqlite3 database. It is based on the stock sqlite3 adapter, but provides built-in support for spatial databases using SpatiaLite. It uses the RGeo library to represent spatial data in Ruby."
   
-  DEPENDENCIES = [['rgeo-activerecord', '>= 0.2.2'], ['sqlite3-ruby', '>= 1.3.2']]
+  DEPENDENCIES = [['rgeo-activerecord', '>= 0.2.5'], ['sqlite3-ruby', '>= 1.3.2']]
   DEVELOPMENT_DEPENDENCIES = []
   
 end

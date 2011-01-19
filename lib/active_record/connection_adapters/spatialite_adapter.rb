@@ -37,6 +37,11 @@
 require 'rgeo/active_record'
 require 'active_record/connection_adapters/sqlite3_adapter'
 
+begin
+  require 'versionomy'
+rescue ::LoadError
+end
+
 
 # :stopdoc:
 
@@ -46,13 +51,13 @@ module Arel
     class SpatiaLite < SQLite
       
       FUNC_MAP = {
-        'ST_WKTToSQL' => 'GeomFromText',
+        'st_wkttosql' => 'GeomFromText',
       }
       
       include ::RGeo::ActiveRecord::SpatialToSql
       
       def st_func(standard_name_)
-        FUNC_MAP[standard_name_] || standard_name_
+        FUNC_MAP[standard_name_.downcase] || standard_name_
       end
       
     end
@@ -136,6 +141,15 @@ module ActiveRecord
       
       
       ADAPTER_NAME = 'SpatiaLite'.freeze
+      
+      
+      # Current version of SpatiaLiteAdapter as a frozen string
+      VERSION_STRING = ::File.read(::File.dirname(__FILE__)+'/../../../Version').strip.freeze
+      
+      # Current version of SpatiaLiteAdapter as a Versionomy object, if the
+      # Versionomy gem is available; otherwise equal to VERSION_STRING.
+      VERSION = defined?(::Versionomy) ? ::Versionomy.parse(VERSION_STRING) : VERSION_STRING
+      
       
       @@native_database_types = nil
       
