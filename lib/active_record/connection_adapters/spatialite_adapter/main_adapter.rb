@@ -96,12 +96,15 @@ module ActiveRecord
         end
         
         
-        def spatial_indexes(table_name_, name_=nil)
+        def indexes(table_name_, name_=nil)
+          results_ = super.map do |index_|
+            ::RGeo::ActiveRecord::SpatialIndexDefinition.new(index_.table, index_.name, index_.unique, index_.columns, index_.lengths)
+          end
           table_name_ = table_name_.to_s
           names_ = select_values("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'idx_#{quote_string(table_name_)}_%' AND rootpage=0") || []
-          names_.map do |name_|
-            col_name_ = name_.sub("idx_#{table_name_}_", '')
-            ::RGeo::ActiveRecord::SpatialIndexDefinition.new(table_name_, name_, false, [col_name_], [], true)
+          results_ + names_.map do |n_|
+            col_name_ = n_.sub("idx_#{table_name_}_", '')
+            ::RGeo::ActiveRecord::SpatialIndexDefinition.new(table_name_, n_, false, [col_name_], [], true)
           end
         end
         
@@ -128,8 +131,8 @@ module ActiveRecord
         
         
         def drop_table(table_name_, options_={})
-          spatial_indexes(table_name_).each do |index_|
-            remove_index(table_name_, :spatial => true, :column => index_.columns[0])
+          indexes(table_name_).each do |index_|
+            remove_index(table_name_, :spatial => true, :column => index_.columns[0]) if index_.spatial
           end
           execute("DELETE from geometry_columns where f_table_name='#{quote_string(table_name_.to_s)}'")
           super

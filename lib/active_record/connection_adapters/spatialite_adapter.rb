@@ -124,3 +124,12 @@ require 'active_record/connection_adapters/spatialite_adapter/main_adapter.rb'
 require 'active_record/connection_adapters/spatialite_adapter/spatial_table_definition.rb'
 require 'active_record/connection_adapters/spatialite_adapter/spatial_column.rb'
 require 'active_record/connection_adapters/spatialite_adapter/arel_tosql.rb'
+
+
+ignore_tables_ = ::ActiveRecord::SchemaDumper.ignore_tables
+ignore_tables_ << 'geometry_columns' unless ignore_tables_.include?('geometry_columns')
+ignore_tables_ << 'geometry_columns_auth' unless ignore_tables_.include?('geometry_columns_auth')
+ignore_tables_ << 'views_geometry_columns' unless ignore_tables_.include?('views_geometry_columns')
+ignore_tables_ << 'virts_geometry_columns' unless ignore_tables_.include?('virts_geometry_columns')
+ignore_tables_ << 'spatial_ref_sys' unless ignore_tables_.include?('spatial_ref_sys')
+ignore_tables_ << /^idx_\w+_\w+$/ unless ignore_tables_.include?(/^idx_\w+_\w+$/)

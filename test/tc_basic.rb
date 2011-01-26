@@ -118,7 +118,7 @@ module RGeo
               klass_.connection.change_table(:spatial_test) do |t_|
                 t_.index([:latlon], :spatial => true)
               end
-              assert(klass_.connection.spatial_indexes(:spatial_test).last.spatial)
+              assert(klass_.connection.indexes(:spatial_test).last.spatial)
               assert_equal(1, klass_.connection.select_value("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='idx_spatial_test_latlon'").to_i)
               klass_.connection.drop_table(:spatial_test)
               assert_equal(0, klass_.connection.select_value("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='idx_spatial_test_latlon'").to_i)
