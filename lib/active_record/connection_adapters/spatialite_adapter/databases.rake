@@ -97,4 +97,5 @@ end
 ::RGeo::ActiveRecord::TaskHacker.modify('db:test:purge', 'test', 'spatialite') do |config_|
   dbfile_ = config_["database"] || config_["dbfile"]
   ::File.delete(dbfile_) if ::File.exist?(dbfile_)
+  create_database(config_)
 end

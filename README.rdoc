@@ -122,15 +122,52 @@ which should be set to the full path to the libspatialite shared library,
 if it is not installed in a standard place (such as /usr/local or
 /opt/local).
 
-Furthermore, the SpatiaLite adapter includes a special railtie that
-provides support for SpatiaLite databases in ActiveRecord's rake tasks.
-This railtie is required in order to run, e.g., rake test. To install 
-this railtie, you should add this line to your config/application.rb:
+Generally, you can create a new Rails application using:
+
+ rails new my_app --database=sqlite3
+
+...and then change the adapter names to "<tt>spatialite</tt>" and add an
+appropriate <tt>libspatialite</tt> setting.
+
+Next, the SpatiaLite adapter includes a special railtie that provides
+support for SpatiaLite databases in ActiveRecord's rake tasks. This
+railtie is required in order to run, e.g., rake test. To install this
+railtie, you should add this line to your config/application.rb:
 
  require 'active_record/connection_adapters/spatialite_adapter/railtie'
 
 Note that this railtie must load after the ActiveRecord railtie. That is,
 the above require command should appear after <tt>require 'rails/all'</tt>.
+
+=== Dealing with SpatiaLite Definitions
+
+SpatiaLite adds many objects (meta-information tables, functions,
+triggers, etc.) to a Sqlite3 database. These objects are required to
+maintain the spatial elements of the database, but they can be a hassle
+when managing the database with Rails. Following are some tips and
+gotchas that you may encounter.
+
+Make sure you include the correct <tt>libspatialite</tt> setting in your
+database.yml config file, especially for your production environments.
+
+SpatiaLite databases need to be initialized by executing the SpatiaLite
+initialization script or by calling the InitSpatialMetaData() function.
+The rake db:create task will do this for you when it creates a database.
+Thus, when setting up a new application, you should make sure you call
+rake db:create or otherwise cause the SpatiaLite initialization to
+occur, before you attempt to run your first migration. Failure to do so
+will result in errors during the migration.
+
+Dumping a SpatiaLite database as SQL will cause a bunch of internal tables
+and triggers to be included in your dump. These are the actual SpatiaLite
+implementation objects used to enforce spatial constraints and implement
+spatial indexes. Unfortunately, not only is this a bit unsightly, but not
+everything is dumped here: for example, for each spatial column, there
+should be a row in the geometry_columns table, and those will be missing
+in the SQL structure dump. As a result, loading from the SQL structure
+dump will not properly reproduce your database schema. Because of this, we
+highly recommend that you leave config.active_record.schema_format set to
+<tt>:ruby</tt> for now, so that schema dumps are done in the Ruby format.
 
 == Additional Information
 
