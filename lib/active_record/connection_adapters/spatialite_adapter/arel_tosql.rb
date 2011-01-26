@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # 
-# Railtie for SpatiaLite adapter
+# SpatiaLite adapter for ActiveRecord
 # 
 # -----------------------------------------------------------------------------
 # Copyright 2010 Daniel Azuma
@@ -34,6 +34,28 @@
 ;
 
 
-puts "WARNING: rgeo/active_record/spatialite_adapter/railtie is deprecated. Please use active_record/connection_adapters/spatialite_adapter/railtie."
+# :stopdoc:
 
-require 'active_record/connection_adapters/spatialite_adapter/railtie'
+module Arel
+  module Visitors
+    
+    class SpatiaLite < SQLite
+      
+      FUNC_MAP = {
+        'st_wkttosql' => 'GeomFromText',
+      }
+      
+      include ::RGeo::ActiveRecord::SpatialToSql
+      
+      def st_func(standard_name_)
+        FUNC_MAP[standard_name_.downcase] || standard_name_
+      end
+      
+    end
+    
+    VISITORS['spatialite'] = ::Arel::Visitors::SpatiaLite
+    
+  end
+end
+
+# :startdoc:

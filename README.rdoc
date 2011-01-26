@@ -7,7 +7,9 @@ the {RGeo}[http://github.com/dazuma/rgeo] library to represent spatial
 data in Ruby. Like the standard sqlite3 adapter, this adapter requires
 the sqlite3-ruby gem.
 
-=== What This Adapter Provides
+== What This Adapter Provides
+
+=== Spatial Migrations
 
 First, this adapter extends the migration syntax to support creating 
 spatial columns and indexes. To create a spatial column, use the
@@ -17,24 +19,29 @@ the <tt>:spatial</tt> option to true.
 
 Examples:
 
- create_table :spatial_table do |t|
+ create_table :my_spatial_table do |t|
    t.column :latlon, :point  # or t.point :latlon
    t.line_string :path
    t.geometry :shape
  end
- change_table :spatial_table do |t|
+ change_table :my_spatial_table do |t|
    t.index :latlon, :spatial => true
  end
+
+=== Spatial Attributes
 
 When this adapter is in use, spatial attributes in your \ActiveRecord
 objects will have RGeo geometry values. You can set spatial attributes
 either to RGeo geometry objects, or to strings in WKT (well-known text)
 format, which the adapter will automatically convert to geometry objects.
 
-To specify the RGeo geometry factory, you can either set an explicit
-factory for a column, or provide a factory generator that will yield the
-appropriate factory for the table's spatial columns based on the value.
-For the former, call the set_rgeo_factory_for_column class method on your
+Spatial objects in RGeo are tied to a factory that specifies the
+coordinate system as well as other behaviors of the object. You must
+therefore specify a factory for each spatial column (attribute) in your
+ActiveRecord class. You can either set an explicit factory for a specific
+column, or provide a factory generator that will yield the appropriate
+factory for the table's spatial columns based on their types. For the
+former, call the <tt>set_rgeo_factory_for_column</tt> class method on your
 \ActiveRecord class. For the latter, set the rgeo_factory_generator class
 attribute. This generator should understand at least the <tt>:srid</tt>
 option, which will be provided based on the column's specified SRID. Note
@@ -45,7 +52,7 @@ actually implemented and documented in the "rgeo-activerecord" gem.
 
 Examples, given the spatial table defined above:
 
- class SpatialTable < ActiveRecord::Base
+ class MySpatialTable < ActiveRecord::Base
    
    # By default, use the GEOS implementation for spatial columns.
    self.rgeo_factory_generator = RGeo::Geos.method(:factory)
@@ -66,6 +73,8 @@ Now you can interact with the data using the RGeo types:
                                  # value will be cast from geographic to GEOS.
  RGeo::Geos.is_geos?(rec.shape)  # => true
 
+=== Spatial Queries
+
 You can create simple queries based on spatial equality in the same way
 you would on a scalar column:
 
@@ -75,9 +84,13 @@ You can also use WKT:
 
  rec = SpatialTable.where(:latlon => 'POINT(-122 47)').first
 
-Other types of queries currently must be written in SQL. However, we are
-investigating writing a set of Arel extensions for constructing arbitrary
-spatial queries.
+The adapter also provides experimental support for more complex queries
+such as radius searches. However, these extensions require Arel 2.1
+(which is scheduled for release with Rails 3.1). We do not have these
+documented yet, and the syntax is subject to change. For now, you should
+write more complex queries in SQL.
+
+== Installation And Configuration
 
 === Installing The Adapter Gem
 
@@ -87,8 +100,8 @@ This adapter has the following requirements:
 * SpatiaLite 2.3 or later (2.4 recommended).
 * \ActiveRecord 3.0.3 or later. Earlier versions will not work.
 * rgeo gem 0.2.4 or later.
-* rgeo-activerecord gem 0.2.2 or later.
-* sqlite3 gem 1.3 or later.
+* rgeo-activerecord gem 0.3.0 or later.
+* sqlite3 gem 1.3.3 or later.
 
 Install this adapter as a gem:
 
@@ -114,10 +127,12 @@ provides support for SpatiaLite databases in ActiveRecord's rake tasks.
 This railtie is required in order to run, e.g., rake test. To install 
 this railtie, you should add this line to your config/application.rb:
 
- require 'rgeo/active_record/spatialite_adapter/railtie'
+ require 'active_record/connection_adapters/spatialite_adapter/railtie'
 
 Note that this railtie must load after the ActiveRecord railtie. That is,
 the above require command should appear after <tt>require 'rails/all'</tt>.
+
+== Additional Information
 
 === Known bugs and limitations
 
@@ -145,7 +160,8 @@ Contact the author at dazuma at gmail dot com.
 
 === Acknowledgments
 
-RGeo is written by Daniel Azuma (http://www.daniel-azuma.com).
+The SpatiaLite Adapter and its supporting libraries (including RGeo) are
+written by Daniel Azuma (http://www.daniel-azuma.com).
 
 Development of RGeo is sponsored by GeoPage, Inc. (http://www.geopage.com).
 

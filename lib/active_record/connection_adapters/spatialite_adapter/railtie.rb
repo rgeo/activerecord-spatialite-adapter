@@ -34,6 +34,27 @@
 ;
 
 
-puts "WARNING: rgeo/active_record/spatialite_adapter/railtie is deprecated. Please use active_record/connection_adapters/spatialite_adapter/railtie."
+require 'rails/railtie'
 
-require 'active_record/connection_adapters/spatialite_adapter/railtie'
+
+module RGeo
+  
+  module ActiveRecord
+    
+    module SpatialiteAdapter
+      
+      
+      class Railtie < ::Rails::Railtie
+        
+        rake_tasks do
+          load ::File.expand_path('databases.rake', ::File.dirname(__FILE__))
+        end
+        
+      end
+      
+      
+    end
+    
+  end
+  
+end

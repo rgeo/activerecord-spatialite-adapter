@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # 
-# Railtie for SpatiaLite adapter
+# SpatiaLite adapter for ActiveRecord
 # 
 # -----------------------------------------------------------------------------
 # Copyright 2010 Daniel Azuma
@@ -34,6 +34,69 @@
 ;
 
 
-puts "WARNING: rgeo/active_record/spatialite_adapter/railtie is deprecated. Please use active_record/connection_adapters/spatialite_adapter/railtie."
+# :stopdoc:
 
-require 'active_record/connection_adapters/spatialite_adapter/railtie'
+module ActiveRecord
+  
+  module ConnectionAdapters
+    
+    module SpatiaLiteAdapter
+      
+      
+      class SpatialTableDefinition < ConnectionAdapters::TableDefinition
+        
+        def column(name_, type_, options_={})
+          if (info_ = @base.spatial_column_constructor(type_.to_sym))
+            options_[:type] ||= info_[:type] || type_
+            type_ = :spatial
+          end
+          super(name_, type_, options_)
+          if type_ == :spatial
+            col_ = self[name_]
+            col_.extend(SpatialColumnDefinitionMethods) unless col_.respond_to?(:srid)
+            options_.merge!(col_.limit) if col_.limit.is_a?(::Hash)
+            col_.set_spatial_type(options_[:type])
+            col_.set_srid(options_[:srid].to_i)
+          end
+          self
+        end
+        
+        def to_sql
+          @columns.find_all{ |c_| !c_.respond_to?(:srid) }.map{ |c_| c_.to_sql } * ', '
+        end
+        
+        def spatial_columns
+          @columns.find_all{ |c_| c_.respond_to?(:srid) }
+        end
+        
+      end
+      
+      
+      module SpatialColumnDefinitionMethods  # :nodoc:
+        
+        def spatial_type
+          defined?(@spatial_type) && @spatial_type
+        end
+        
+        def srid
+          defined?(@srid) ? @srid : 4326
+        end
+        
+        def set_spatial_type(value_)
+          @spatial_type = value_.to_s
+        end
+        
+        def set_srid(value_)
+          @srid = value_
+        end
+        
+      end
+      
+      
+    end
+    
+  end
+  
+end
+
+# :startdoc:
