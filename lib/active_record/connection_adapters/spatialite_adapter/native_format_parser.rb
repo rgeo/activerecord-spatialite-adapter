@@ -41,13 +41,22 @@ module ActiveRecord
     module SpatiaLiteAdapter
       
       
+      # A utility class that parses the native (internal) SpatiaLite
+      # format. This is used to read and return an attribute value as an
+      # RGeo object.
+      
       class NativeFormatParser
         
+        
+        # Create a parser that generates features using the given factory.
         
         def initialize(factory_)
           @factory = factory_
         end
         
+        
+        # Parse the given binary data and return an object.
+        # Raises ::RGeo::Error::ParseError on failure.
         
         def parse(data_)
           @little_endian = data_[1,1] == "\x01"

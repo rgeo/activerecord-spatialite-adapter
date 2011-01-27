@@ -62,7 +62,7 @@ module RAKEFILE
   PRODUCT_SUMMARY = "An ActiveRecord adapter for SpatiaLite, based on RGeo."
   PRODUCT_DESCRIPTION = "This is an ActiveRecord connection adapter for the SpatiaLite extension to the Sqlite3 database. It is based on the stock sqlite3 adapter, but provides built-in support for spatial databases using SpatiaLite. It uses the RGeo library to represent spatial data in Ruby."
   
-  DEPENDENCIES = [['rgeo-activerecord', '>= 0.3.0'], ['sqlite3', '>= 1.3.3']]
+  DEPENDENCIES = [['rgeo-activerecord', '~> 0.3.0'], ['sqlite3', '>= 1.3.3']]
   DEVELOPMENT_DEPENDENCIES = []
   
 end
@@ -173,9 +173,8 @@ file "#{::RAKEFILE::DOC_DIRECTORY}/index.html" => ::RAKEFILE::ALL_RDOC_FILES do
   args_ << '--title' << ::RAKEFILE::RDOC_TITLE
   args_ << '-f' << 'darkfish'
   args_ << '--verbose' if ::ENV['VERBOSE']
-  require 'rdoc'
+  gem 'rdoc'
   require 'rdoc/rdoc'
-  require 'rdoc/generator/darkfish'
   ::RDoc::RDoc.new.document(args_ + ::RAKEFILE::ALL_RDOC_FILES)
 end
 

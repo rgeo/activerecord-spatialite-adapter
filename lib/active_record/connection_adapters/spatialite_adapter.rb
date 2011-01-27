@@ -103,17 +103,18 @@ module ActiveRecord
   
   
   # All ActiveRecord adapters go in this namespace.
-  
   module ConnectionAdapters
     
-    
     # The SpatiaLite Adapter
-    
     module SpatiaLiteAdapter
+      
+      # The name returned by the adapter_name method of this adapter.
+      ADAPTER_NAME = 'SpatiaLite'.freeze
+      
     end
     
-    
   end
+  
   
 end
 

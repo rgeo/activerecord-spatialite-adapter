@@ -34,6 +34,8 @@
 ;
 
 
+# :stopdoc:
+
 module ActiveRecord
   
   module ConnectionAdapters
@@ -44,13 +46,11 @@ module ActiveRecord
       class MainAdapter < SQLite3Adapter
         
         
-        ADAPTER_NAME = 'SpatiaLite'.freeze
-        
         @@native_database_types = nil
         
         
         def adapter_name
-          ADAPTER_NAME
+          SpatiaLiteAdapter::ADAPTER_NAME
         end
         
         
@@ -230,3 +230,5 @@ module ActiveRecord
   end
   
 end
+
+# :startdoc:

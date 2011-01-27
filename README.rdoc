@@ -19,14 +19,14 @@ the <tt>:spatial</tt> option to true.
 
 Examples:
 
- create_table :my_spatial_table do |t|
-   t.column :latlon, :point  # or t.point :latlon
-   t.line_string :path
-   t.geometry :shape
- end
- change_table :my_spatial_table do |t|
-   t.index :latlon, :spatial => true
- end
+  create_table :my_spatial_table do |t|
+    t.column :latlon, :point  # or t.point :latlon
+    t.line_string :path
+    t.geometry :shape
+  end
+  change_table :my_spatial_table do |t|
+    t.index :latlon, :spatial => true
+  end
 
 === Spatial Attributes
 
@@ -52,37 +52,37 @@ actually implemented and documented in the "rgeo-activerecord" gem.
 
 Examples, given the spatial table defined above:
 
- class MySpatialTable < ActiveRecord::Base
-   
-   # By default, use the GEOS implementation for spatial columns.
-   self.rgeo_factory_generator = RGeo::Geos.method(:factory)
-   
-   # But use a geographic implementation for the :latlon column.
-   set_rgeo_factory_for_column(:latlon, RGeo::Geographic.spherical_factory)
-   
- end
+  class MySpatialTable < ActiveRecord::Base
+    
+    # By default, use the GEOS implementation for spatial columns.
+    self.rgeo_factory_generator = RGeo::Geos.method(:factory)
+    
+    # But use a geographic implementation for the :latlon column.
+    set_rgeo_factory_for_column(:latlon, RGeo::Geographic.spherical_factory)
+    
+  end
 
 Now you can interact with the data using the RGeo types:
 
- rec = MySpatialTable.new
- rec.latlon = 'POINT(-122 47)'   # You can set by feature object or WKT.
- loc = rec.latlon                # Accessing always returns a feature object, in
-                                 # this case, a geographic that understands latitude.
- loc.latitude                    # => 47
- rec.shape = loc                 # the factory for the :shape column is GEOS, so the
-                                 # value will be cast from geographic to GEOS.
- RGeo::Geos.is_geos?(rec.shape)  # => true
+  rec = MySpatialTable.new
+  rec.latlon = 'POINT(-122 47)'   # You can set by feature object or WKT.
+  loc = rec.latlon                # Accessing always returns a feature object, in
+                                  # this case, a geographic that understands latitude.
+  loc.latitude                    # => 47
+  rec.shape = loc                 # the factory for the :shape column is GEOS, so the
+                                  # value will be cast from geographic to GEOS.
+  RGeo::Geos.is_geos?(rec.shape)  # => true
 
 === Spatial Queries
 
 You can create simple queries based on spatial equality in the same way
 you would on a scalar column:
 
- rec = MySpatialTable.where(:latlon => RGeo::Geos.factory.point(-122, 47)).first
+  rec = MySpatialTable.where(:latlon => RGeo::Geos.factory.point(-122, 47)).first
 
 You can also use WKT:
 
- rec = MySpatialTable.where(:latlon => 'POINT(-122 47)').first
+  rec = MySpatialTable.where(:latlon => 'POINT(-122 47)').first
 
 The adapter also provides experimental support for more complex queries
 such as radius searches. However, these extensions require Arel 2.1
@@ -105,7 +105,7 @@ This adapter has the following requirements:
 
 Install this adapter as a gem:
 
- gem install activerecord-spatialite-adapter
+  gem install activerecord-spatialite-adapter
 
 See the README for the "rgeo" gem, a required dependency, for further
 installation information.
@@ -124,7 +124,7 @@ if it is not installed in a standard place (such as /usr/local or
 
 Generally, you can create a new Rails application using:
 
- rails new my_app --database=sqlite3
+  rails new my_app --database=sqlite3
 
 ...and then change the adapter names to "<tt>spatialite</tt>" and add an
 appropriate <tt>libspatialite</tt> setting.
@@ -134,7 +134,7 @@ support for SpatiaLite databases in ActiveRecord's rake tasks. This
 railtie is required in order to run, e.g., rake test. To install this
 railtie, you should add this line to your config/application.rb:
 
- require 'active_record/connection_adapters/spatialite_adapter/railtie'
+  require 'active_record/connection_adapters/spatialite_adapter/railtie'
 
 Note that this railtie must load after the ActiveRecord railtie. That is,
 the above require command should appear after <tt>require 'rails/all'</tt>.

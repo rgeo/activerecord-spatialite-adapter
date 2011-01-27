@@ -37,6 +37,8 @@
 require 'rails/railtie'
 
 
+# :stopdoc:
+
 module RGeo
   
   module ActiveRecord
@@ -58,3 +60,5 @@ module RGeo
   end
   
 end
+
+# :startdoc:
