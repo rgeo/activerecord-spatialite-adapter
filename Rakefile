@@ -62,7 +62,7 @@ module RAKEFILE
   PRODUCT_SUMMARY = "An ActiveRecord adapter for SpatiaLite, based on RGeo."
   PRODUCT_DESCRIPTION = "This is an ActiveRecord connection adapter for the SpatiaLite extension to the Sqlite3 database. It is based on the stock sqlite3 adapter, but provides built-in support for spatial databases using SpatiaLite. It uses the RGeo library to represent spatial data in Ruby."
   
-  DEPENDENCIES = [['rgeo-activerecord', '~> 0.3.0'], ['sqlite3', '>= 1.3.3']]
+  DEPENDENCIES = [['rgeo-activerecord', '~> 0.3.1'], ['sqlite3', '>= 1.3.3']]
   DEVELOPMENT_DEPENDENCIES = []
   
 end
@@ -180,6 +180,7 @@ end
 
 
 task :publish_rdoc => :build_rdoc do
+  require 'yaml'
   config_ = ::YAML.load(::File.read(::File.expand_path("~/.rubyforge/user-config.yml")))
   username_ = config_['username']
   sh "rsync -av --delete #{::RAKEFILE::DOC_DIRECTORY}/ #{username_}@rubyforge.org:/var/www/gforge-projects/#{::RAKEFILE::RUBYFORGE_PROJECT}/#{::RAKEFILE::PRODUCT_NAME}"
