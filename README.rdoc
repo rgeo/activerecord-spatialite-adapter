@@ -100,8 +100,8 @@ This adapter has the following requirements:
 * SpatiaLite 2.3 or later (2.4 recommended).
 * sqlite3 gem 1.3.3 or later.
 * \ActiveRecord 3.0.3 or later. Earlier versions will not work.
-* rgeo gem 0.2.4 or later.
-* rgeo-activerecord gem 0.3.1 or later.
+* rgeo gem 0.2.8 or later.
+* rgeo-activerecord gem 0.3.3 or later.
 
 Install this adapter as a gem:
 
@@ -204,7 +204,7 @@ Development of RGeo is sponsored by GeoPage, Inc. (http://www.geopage.com).
 
 === License
 
-Copyright 2010 Daniel Azuma
+Copyright 2010-2011 Daniel Azuma
 
 All rights reserved.
 
