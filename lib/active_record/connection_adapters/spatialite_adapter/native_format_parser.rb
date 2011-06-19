@@ -59,6 +59,9 @@ module ActiveRecord
         # Raises ::RGeo::Error::ParseError on failure.
         
         def parse(data_)
+          if data_[0,1] =~ /[0-9a-fA-F]/
+            data_ = [data_].pack('H*')
+          end
           @little_endian = data_[1,1] == "\x01"
           srid_ = data_[2,4].unpack(@little_endian ? 'V' : 'N').first
           begin

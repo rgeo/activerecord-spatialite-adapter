@@ -1,3 +1,9 @@
+=== 0.3.4 / 2011-06-21
+
+* Require latest rgeo-activerecord to get some fixes.
+* Support hex format for attribute setting.
+* No longer raises exceptions if parse fails on attribute setting. (Reported by Daniel Hackney)
+
 === 0.3.3 / 2011-04-12
 
 * The .gemspec was missing the databases.rake file. Fixed.
