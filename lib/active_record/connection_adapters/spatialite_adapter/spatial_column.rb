@@ -46,20 +46,17 @@ module ActiveRecord
       class SpatialColumn < ConnectionAdapters::SQLiteColumn
         
         
-        def initialize(name_, default_, sql_type_=nil, null_=true)
+        def initialize(factory_settings_, table_name_, name_, default_, sql_type_=nil, null_=true)
+          @factory_settings = factory_settings_
+          @table_name = table_name_
           super(name_, default_, sql_type_, null_)
           @geometric_type = ::RGeo::ActiveRecord.geometric_type_from_name(sql_type_)
           @srid = 0
           if type == :spatial
             @limit = {:srid => @srid, :type => @geometric_type.type_name.underscore}
           end
-          @ar_class = ::ActiveRecord::Base
         end
         
-        
-        def set_ar_class(val_)
-          @ar_class = val_
-        end
         
         def set_srid(val_)
           @srid = val_
@@ -84,12 +81,22 @@ module ActiveRecord
         
         
         def type_cast(value_)
-          type == :spatial ? SpatialColumn.convert_to_geometry(value_, @ar_class, name, @srid) : super
+          if type == :spatial
+            SpatialColumn.convert_to_geometry(value_, @factory_settings, @table_name, name, @srid)
+          else
+            super
+          end
         end
         
         
         def type_cast_code(var_name_)
-          type == :spatial ? "::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::SpatialColumn.convert_to_geometry(#{var_name_}, self.class, #{name.inspect}, #{@srid})" : super
+          if type == :spatial
+            "::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::SpatialColumn.convert_to_geometry("+
+              "#{var_name_}, self.class.rgeo_factory_settings, self.class.table_name, "+
+              "#{name.inspect}, #{@srid})"
+          else
+            super
+          end
         end
         
         
@@ -101,16 +108,16 @@ module ActiveRecord
         end
         
         
-        def self.convert_to_geometry(input_, ar_class_, column_name_, column_srid_)
+        def self.convert_to_geometry(input_, factory_settings_, table_name_, column_name_, column_srid_)
           case input_
           when ::RGeo::Feature::Geometry
-            factory_ = ar_class_.rgeo_factory_for_column(column_name_, :srid => column_srid_)
+            factory_ = factory_settings_.get_column_factory(table_name_, column_name_, :srid => column_srid_)
             ::RGeo::Feature.cast(input_, factory_) rescue nil
           when ::String
             if input_.length == 0
               nil
             else
-              factory_ = ar_class_.rgeo_factory_for_column(column_name_, :srid => column_srid_)
+              factory_ = factory_settings_.get_column_factory(table_name_, column_name_, :srid => column_srid_)
               if input_[0,1] == "\x00" || input_[0,4] =~ /[0-9a-fA-F]{4}/
                 NativeFormatParser.new(factory_).parse(input_) rescue nil
               else

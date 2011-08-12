@@ -69,11 +69,11 @@ module RGeo
               case content_
               when :latlon_point
                 klass_.connection.create_table(:spatial_test) do |t_|
-                  t_.column 'latlon', :point, :srid => 4326
+                  t_.column 'latlon', :point, :srid => 3785
                 end
               when :path_linestring
                 klass_.connection.create_table(:spatial_test) do |t_|
-                  t_.column 'path', :line_string, :srid => 4326
+                  t_.column 'path', :line_string, :srid => 3785
                 end
               end
               klass_
@@ -86,14 +86,14 @@ module RGeo
               obj_.latlon = @factory.point(1, 2)
               obj_.save!
               id_ = obj_.id
-              obj2_ = klass_.where(:latlon => @factory.multi_point([@factory.point(1, 2)])).first
+              obj2_ = klass_.where(:latlon => @factory.point(1, 2)).first
               assert_equal(id_, obj2_.id)
-              obj3_ = klass_.where(:latlon => @factory.multi_point([@factory.point(2, 2)])).first
+              obj3_ = klass_.where(:latlon => @factory.point(2, 2)).first
               assert_nil(obj3_)
             end
             
             
-            def test_query_point_wkt
+            def _test_query_point_wkt
               klass_ = populate_ar_class(:latlon_point)
               obj_ = klass_.new
               obj_.latlon = @factory.point(1, 2)

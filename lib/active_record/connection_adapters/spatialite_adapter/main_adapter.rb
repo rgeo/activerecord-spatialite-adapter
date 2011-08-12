@@ -49,6 +49,11 @@ module ActiveRecord
         @@native_database_types = nil
         
         
+        def set_rgeo_factory_settings(factory_settings_)
+          @rgeo_factory_settings = factory_settings_
+        end
+        
+        
         def adapter_name
           SpatiaLiteAdapter::ADAPTER_NAME
         end
@@ -83,10 +88,43 @@ module ActiveRecord
         end
         
         
+        def substitute_at(column_, index_)
+          if column_.spatial?
+            ::Arel.sql('GeomFromText(?,?)')
+          else
+            super
+          end
+        end
+        
+        
+        def type_cast(value_, column_)
+          if column_.spatial? && ::RGeo::Feature::Geometry.check_type(value_)
+            ::RGeo::WKRep::WKTGenerator.new(:convert_case => :upper).generate(value_)
+          else
+            super
+          end
+        end
+        
+        
+        def exec_query(sql_, name_=nil, binds_=[])
+          real_binds_ = []
+          binds_.each do |bind_|
+            if bind_[0].spatial?
+              real_binds_ << bind_
+              real_binds_ << [bind_[0], bind_[1].srid]
+            else
+              real_binds_ << bind_
+            end
+          end
+          super(sql_, name_, real_binds_)
+        end
+        
+        
         def columns(table_name_, name_=nil)  #:nodoc:
           spatial_info_ = spatial_column_info(table_name_)
           table_structure(table_name_).map do |field_|
-            col_ = SpatialColumn.new(field_['name'], field_['dflt_value'], field_['type'], field_['notnull'].to_i == 0)
+            col_ = SpatialColumn.new(@rgeo_factory_settings, table_name_.to_s, field_['name'],
+              field_['dflt_value'], field_['type'], field_['notnull'].to_i == 0)
             info_ = spatial_info_[field_['name']]
             if info_
               col_.set_srid(info_[:srid])
