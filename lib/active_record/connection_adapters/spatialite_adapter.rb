@@ -92,9 +92,10 @@ module ActiveRecord
       unless path_
         raise 'Cannot find libspatialite in the usual places. Please provide the path in the "libspatialite" config parameter.'
       end
-      db_.enable_load_extension(1)
-      db_.load_extension(path_)
-      
+      if db_.respond_to?(:enable_load_extension)
+        db_.enable_load_extension(1)
+      	db_.load_extension(path_)
+      end
       ::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::MainAdapter.new(db_, logger, config_)
     end
     
