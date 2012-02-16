@@ -111,7 +111,7 @@ module ActiveRecord
           binds_.each do |bind_|
             if bind_[0].spatial?
               real_binds_ << bind_
-              real_binds_ << [bind_[0], bind_[1].srid]
+              real_binds_ << [bind_[0], bind_[1] ? bind_[1].srid : nil]
             else
               real_binds_ << bind_
             end
@@ -163,7 +163,8 @@ module ActiveRecord
           execute create_sql_
           
           table_definition_.spatial_columns.each do |col_|
-            execute("SELECT AddGeometryColumn('#{quote_string(table_name_)}', '#{quote_string(col_.name.to_s)}', #{col_.srid}, '#{quote_string(col_.spatial_type.gsub('_','').upcase)}', 'XY', #{col_.null ? 0 : 1})")
+            null_ = col_.null.nil? ? true : col_.null
+            execute("SELECT AddGeometryColumn('#{quote_string(table_name_)}', '#{quote_string(col_.name.to_s)}', #{col_.srid}, '#{quote_string(col_.spatial_type.gsub('_','').upcase)}', 'XY', #{null_ ? 0 : 1})")
           end
         end
         
@@ -182,7 +183,8 @@ module ActiveRecord
             limit_ = options_[:limit]
             options_.merge!(limit_) if limit_.is_a?(::Hash)
             type_ = (options_[:type] || info_[:type] || type_).to_s.gsub('_', '').upcase
-            execute("SELECT AddGeometryColumn('#{quote_string(table_name_.to_s)}', '#{quote_string(column_name_.to_s)}', #{options_[:srid].to_i}, '#{quote_string(type_.to_s)}', 'XY', #{options_[:null] == false ? 0 : 1})")
+            null_ = options[:null].nil? ? true : options[:null]
+            execute("SELECT AddGeometryColumn('#{quote_string(table_name_.to_s)}', '#{quote_string(column_name_.to_s)}', #{options_[:srid].to_i}, '#{quote_string(type_.to_s)}', 'XY', #{null_ ? 0 : 1})")
           else
             super
           end
