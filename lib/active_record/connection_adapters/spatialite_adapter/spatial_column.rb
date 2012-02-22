@@ -46,6 +46,10 @@ module ActiveRecord
       class SpatialColumn < ConnectionAdapters::SQLiteColumn
         
         
+        FACTORY_SETTINGS_CACHE = {}
+        
+        
+        
         def initialize(factory_settings_, table_name_, name_, default_, sql_type_=nil, null_=true)
           @factory_settings = factory_settings_
           @table_name = table_name_
@@ -55,6 +59,7 @@ module ActiveRecord
           if type == :spatial
             @limit = {:srid => @srid, :type => @geometric_type.type_name.underscore}
           end
+          FACTORY_SETTINGS_CACHE[factory_settings_.object_id] = factory_settings_
         end
         
         
@@ -92,7 +97,8 @@ module ActiveRecord
         def type_cast_code(var_name_)
           if type == :spatial
             "::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::SpatialColumn.convert_to_geometry("+
-              "#{var_name_}, self.class.rgeo_factory_settings, self.class.table_name, "+
+              "#{var_name_}, ::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::SpatialColumn::"+
+              "FACTORY_SETTINGS_CACHE[#{@factory_settings.object_id}], #{@table_name.inspect}, "+
               "#{name.inspect}, #{@srid})"
           else
             super
