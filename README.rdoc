@@ -100,9 +100,9 @@ This adapter has the following requirements:
 * SpatiaLite 2.3 or later (2.4 recommended).
 * sqlite3 gem 1.3.3 or later.
 * \ActiveRecord 3.0.3 or later. Earlier versions will not work.
-  Appears to be compatible with Rails 3.1rc5.
-* rgeo gem 0.3.2 or later.
-* rgeo-activerecord gem 0.4.0 or later.
+  Should be compatible with Rails versions through 3.2.x.
+* rgeo gem 0.3.4 or later.
+* rgeo-activerecord gem 0.4.3 or later.
 
 Install this adapter as a gem:
 
@@ -203,7 +203,7 @@ Contact the author at dazuma at gmail dot com.
 The SpatiaLite Adapter and its supporting libraries (including RGeo) are
 written by Daniel Azuma (http://www.daniel-azuma.com).
 
-Development of RGeo is sponsored by GeoPage, Inc. (http://www.geopage.com).
+Development is supported by Pirq. (http://www.pirq.com).
 
 === License
 

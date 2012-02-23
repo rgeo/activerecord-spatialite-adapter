@@ -1,15 +1,15 @@
 # -----------------------------------------------------------------------------
-# 
+#
 # SpatiaLite adapter for ActiveRecord
-# 
+#
 # -----------------------------------------------------------------------------
 # Copyright 2010 Daniel Azuma
-# 
+#
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # * Redistributions of source code must retain the above copyright notice,
 #   this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above copyright notice,
@@ -18,7 +18,7 @@
 # * Neither the name of the copyright holder, nor the names of any other
 #   contributors to this software, may be used to endorse or promote products
 #   derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -37,18 +37,18 @@
 # :stopdoc:
 
 module ActiveRecord
-  
+
   module ConnectionAdapters
-    
+
     module SpatiaLiteAdapter
-      
-      
+
+
       class MainAdapter < SQLite3Adapter
-        
-        
+
+
         @@native_database_types = nil
-        
-        
+
+
         def initialize(*args_)
           super
           # Rails 3.2 way of defining the visitor: do so in the constructor
@@ -56,38 +56,38 @@ module ActiveRecord
             @visitor = ::Arel::Visitors::SpatiaLite.new(self)
           end
         end
-        
-        
+
+
         def set_rgeo_factory_settings(factory_settings_)
           @rgeo_factory_settings = factory_settings_
         end
-        
-        
+
+
         def adapter_name
           SpatiaLiteAdapter::ADAPTER_NAME
         end
-        
-        
+
+
         def spatial_column_constructor(name_)
           ::RGeo::ActiveRecord::DEFAULT_SPATIAL_COLUMN_CONSTRUCTORS[name_]
         end
-        
-        
+
+
         def native_database_types
           @@native_database_types ||= super.merge(:spatial => {:name => 'geometry'})
         end
-        
-        
+
+
         def spatialite_version
           @spatialite_version ||= SQLiteAdapter::Version.new(select_value('SELECT spatialite_version()'))
         end
-        
-        
+
+
         def srs_database_columns
           {:name_column => 'ref_sys_name', :proj4text_column => 'proj4text', :auth_name_column => 'auth_name', :auth_srid_column => 'auth_srid'}
         end
-        
-        
+
+
         def quote(value_, column_=nil)
           if ::RGeo::Feature::Geometry.check_type(value_)
             "GeomFromWKB(X'#{::RGeo::WKRep::WKBGenerator.new(:hex_format => true).generate(value_)}', #{value_.srid})"
@@ -95,8 +95,8 @@ module ActiveRecord
             super
           end
         end
-        
-        
+
+
         def substitute_at(column_, index_)
           if column_.spatial?
             ::Arel.sql('GeomFromText(?,?)')
@@ -104,8 +104,8 @@ module ActiveRecord
             super
           end
         end
-        
-        
+
+
         def type_cast(value_, column_)
           if column_.spatial? && ::RGeo::Feature::Geometry.check_type(value_)
             ::RGeo::WKRep::WKTGenerator.new(:convert_case => :upper).generate(value_)
@@ -113,8 +113,8 @@ module ActiveRecord
             super
           end
         end
-        
-        
+
+
         def exec_query(sql_, name_=nil, binds_=[])
           real_binds_ = []
           binds_.each do |bind_|
@@ -127,8 +127,8 @@ module ActiveRecord
           end
           super(sql_, name_, real_binds_)
         end
-        
-        
+
+
         def columns(table_name_, name_=nil)  #:nodoc:
           spatial_info_ = spatial_column_info(table_name_)
           table_structure(table_name_).map do |field_|
@@ -141,8 +141,8 @@ module ActiveRecord
             col_
           end
         end
-        
-        
+
+
         def indexes(table_name_, name_=nil)
           results_ = super.map do |index_|
             ::RGeo::ActiveRecord::SpatialIndexDefinition.new(index_.table, index_.name, index_.unique, index_.columns, index_.lengths)
@@ -154,8 +154,8 @@ module ActiveRecord
             ::RGeo::ActiveRecord::SpatialIndexDefinition.new(table_name_, n_, false, [col_name_], [], true)
           end
         end
-        
-        
+
+
         def create_table(table_name_, options_={})
           table_name_ = table_name_.to_s
           table_definition_ = SpatialTableDefinition.new(self)
@@ -164,19 +164,19 @@ module ActiveRecord
           if options_[:force] && table_exists?(table_name_)
             drop_table(table_name_, options_)
           end
-          
+
           create_sql_ = "CREATE#{' TEMPORARY' if options_[:temporary]} TABLE "
           create_sql_ << "#{quote_table_name(table_name_)} ("
           create_sql_ << table_definition_.to_sql
           create_sql_ << ") #{options_[:options]}"
           execute create_sql_
-          
+
           table_definition_.spatial_columns.each do |col_|
             execute("SELECT AddGeometryColumn('#{quote_string(table_name_)}', '#{quote_string(col_.name.to_s)}', #{col_.srid}, '#{quote_string(col_.spatial_type.gsub('_','').upcase)}', 'XY', #{col_.null ? 0 : 1})")
           end
         end
-        
-        
+
+
         def drop_table(table_name_, options_={})
           indexes(table_name_).each do |index_|
             remove_index(table_name_, :spatial => true, :column => index_.columns[0]) if index_.spatial
@@ -184,8 +184,8 @@ module ActiveRecord
           execute("DELETE from geometry_columns where f_table_name='#{quote_string(table_name_.to_s)}'")
           super
         end
-        
-        
+
+
         def add_column(table_name_, column_name_, type_, options_={})
           if (info_ = spatial_column_constructor(type_.to_sym))
             limit_ = options_[:limit]
@@ -196,8 +196,8 @@ module ActiveRecord
             super
           end
         end
-        
-        
+
+
         def add_index(table_name_, column_name_, options_={})
           if options_[:spatial]
             column_name_ = column_name_.first if column_name_.kind_of?(::Array) && column_name_.size == 1
@@ -216,8 +216,8 @@ module ActiveRecord
             super
           end
         end
-        
-        
+
+
         def remove_index(table_name_, options_={})
           if options_[:spatial]
             table_name_ = table_name_.to_s
@@ -251,8 +251,8 @@ module ActiveRecord
             super
           end
         end
-        
-        
+
+
         def spatial_column_info(table_name_)
           info_ = execute("SELECT * FROM geometry_columns WHERE f_table_name='#{quote_string(table_name_.to_s)}'")
           result_ = {}
@@ -267,15 +267,15 @@ module ActiveRecord
           end
           result_
         end
-        
-        
+
+
       end
-      
-      
+
+
     end
-    
+
   end
-  
+
 end
 
 # :startdoc:
