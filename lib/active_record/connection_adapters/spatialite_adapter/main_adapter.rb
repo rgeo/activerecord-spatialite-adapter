@@ -177,7 +177,7 @@ module ActiveRecord
         end
 
 
-        def drop_table(table_name_, options_={})
+        def drop_table(table_name_, *options_)
           indexes(table_name_).each do |index_|
             remove_index(table_name_, :spatial => true, :column => index_.columns[0]) if index_.spatial
           end
