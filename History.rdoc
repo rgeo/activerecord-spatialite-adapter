@@ -1,6 +1,9 @@
-=== 0.4.1 / 2012-02-??
+=== 0.4.1 / 2012-03-??
 
 * Some compatibility fixes for Rails 3.2.
+* Geometry columns were "not null" by default. Fixed. (Patch by michael-groble.)
+* Fixed exception on inserting nil values. (Patch by michael-groble.)
+* No longer raises exceptions on driver versions that don't support enable_load_extension. (Patch by michael-groble.)
 * Now requires rgeo-activerecord 0.4.3.
 
 === 0.4.0 / 2011-08-15
