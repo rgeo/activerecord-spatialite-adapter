@@ -1,15 +1,15 @@
 # -----------------------------------------------------------------------------
-# 
+#
 # Tests for the MysqlSpatial ActiveRecord adapter
-# 
+#
 # -----------------------------------------------------------------------------
 # Copyright 2010 Daniel Azuma
-# 
+#
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # * Redistributions of source code must retain the above copyright notice,
 #   this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above copyright notice,
@@ -18,7 +18,7 @@
 # * Neither the name of the copyright holder, nor the names of any other
 #   contributors to this software, may be used to endorse or promote products
 #   derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -41,29 +41,29 @@ module RGeo
   module ActiveRecord  # :nodoc:
     module SpatiaLiteAdapter  # :nodoc:
       module Tests  # :nodoc:
-        
+
         class TestBasic < ::Test::Unit::TestCase  # :nodoc:
-          
-          
+
+
           DATABASE_CONFIG_PATH = ::File.dirname(__FILE__)+'/database.yml'
-          
+
           def self.before_open_database(params_)
             database_ = params_[:config][:database]
             dir_ = ::File.dirname(database_)
             ::FileUtils.mkdir_p(dir_) unless dir_ == '.'
             ::FileUtils.rm_f(database_)
           end
-          
+
           def self.initialize_database(params_)
             params_[:connection].execute('SELECT InitSpatialMetaData()')
           end
-          
+
           include AdapterTestHelper
-          
-          
+
+
           define_test_methods do
-            
-            
+
+
             def populate_ar_class(content_)
               klass_ = create_ar_class
               case content_
@@ -74,19 +74,19 @@ module RGeo
               end
               klass_
             end
-            
-            
+
+
             def test_version
               assert_not_nil(::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::VERSION)
             end
-            
-            
+
+
             def test_meta_data_present
               result_ = DEFAULT_AR_CLASS.connection.select_value("SELECT COUNT(*) FROM spatial_ref_sys").to_i
               assert_not_equal(0, result_)
             end
-            
-            
+
+
             def test_create_simple_geometry
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -98,8 +98,8 @@ module RGeo
               klass_.connection.drop_table(:spatial_test)
               assert_equal(0, klass_.connection.select_value("SELECT COUNT(*) FROM geometry_columns WHERE f_table_name='spatial_test'").to_i)
             end
-            
-            
+
+
             def test_create_point_geometry
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -108,8 +108,8 @@ module RGeo
               assert_equal(::RGeo::Feature::Point, klass_.columns.last.geometric_type)
               assert(klass_.cached_attributes.include?('latlon'))
             end
-            
-            
+
+
             def test_create_geometry_with_index
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -123,8 +123,8 @@ module RGeo
               klass_.connection.drop_table(:spatial_test)
               assert_equal(0, klass_.connection.select_value("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='idx_spatial_test_latlon'").to_i)
             end
-            
-            
+
+
             def test_set_and_get_point
               klass_ = populate_ar_class(:latlon_point)
               obj_ = klass_.new
@@ -133,8 +133,8 @@ module RGeo
               assert_equal(@factory.point(1, 2), obj_.latlon)
               assert_equal(3785, obj_.latlon.srid)
             end
-            
-            
+
+
             def test_set_and_get_point_from_wkt
               klass_ = populate_ar_class(:latlon_point)
               obj_ = klass_.new
@@ -143,8 +143,8 @@ module RGeo
               assert_equal(@factory.point(1, 2), obj_.latlon)
               assert_equal(3785, obj_.latlon.srid)
             end
-            
-            
+
+
 if false
             def test_save_and_load_point
               klass_ = populate_ar_class(:latlon_point)
@@ -156,8 +156,8 @@ if false
               assert_equal(@factory.point(1, 2), obj2_.latlon)
               assert_equal(3785, obj2_.latlon.srid)
             end
-            
-            
+
+
             def test_save_and_load_point_from_wkt
               klass_ = populate_ar_class(:latlon_point)
               obj_ = klass_.new
@@ -169,8 +169,8 @@ if false
               assert_equal(3785, obj2_.latlon.srid)
             end
 end
-            
-            
+
+
             def test_add_column
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -188,8 +188,8 @@ end
               assert_equal(4326, cols_[-2].srid)
               assert_nil(cols_[-1].geometric_type)
             end
-            
-            
+
+
             def test_readme_example
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -211,8 +211,8 @@ end
               rec_.shape = loc_
               assert_equal(true, ::RGeo::Geos.is_geos?(rec_.shape))
             end
-            
-            
+
+
             def test_create_simple_geometry_using_shortcut
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -224,8 +224,8 @@ end
               klass_.connection.drop_table(:spatial_test)
               assert_equal(0, klass_.connection.select_value("SELECT COUNT(*) FROM geometry_columns WHERE f_table_name='spatial_test'").to_i)
             end
-            
-            
+
+
             def test_create_point_geometry_using_shortcut
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -234,8 +234,8 @@ end
               assert_equal(::RGeo::Feature::Point, klass_.columns.last.geometric_type)
               assert(klass_.cached_attributes.include?('latlon'))
             end
-            
-            
+
+
             def test_create_geometry_with_options
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -250,8 +250,8 @@ end
               klass_.connection.drop_table(:spatial_test)
               assert_equal(0, klass_.connection.select_value("SELECT COUNT(*) FROM geometry_columns WHERE f_table_name='spatial_test'").to_i)
             end
-            
-            
+
+
             def test_create_geometry_using_limit
               klass_ = create_ar_class
               klass_.connection.create_table(:spatial_test) do |t_|
@@ -266,12 +266,12 @@ end
               klass_.connection.drop_table(:spatial_test)
               assert_equal(0, klass_.connection.select_value("SELECT COUNT(*) FROM geometry_columns WHERE f_table_name='spatial_test'").to_i)
             end
-            
-            
+
+
           end
-          
+
         end
-        
+
       end
     end
   end

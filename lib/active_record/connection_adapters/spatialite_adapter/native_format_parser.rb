@@ -1,15 +1,15 @@
 # -----------------------------------------------------------------------------
-# 
+#
 # SpatiaLite adapter for ActiveRecord
-# 
+#
 # -----------------------------------------------------------------------------
 # Copyright 2010 Daniel Azuma
-# 
+#
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # * Redistributions of source code must retain the above copyright notice,
 #   this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above copyright notice,
@@ -18,7 +18,7 @@
 # * Neither the name of the copyright holder, nor the names of any other
 #   contributors to this software, may be used to endorse or promote products
 #   derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -35,29 +35,29 @@
 
 
 module ActiveRecord
-  
+
   module ConnectionAdapters
-    
+
     module SpatiaLiteAdapter
-      
-      
+
+
       # A utility class that parses the native (internal) SpatiaLite
       # format. This is used to read and return an attribute value as an
       # RGeo object.
-      
+
       class NativeFormatParser
-        
-        
+
+
         # Create a parser that generates features using the given factory.
-        
+
         def initialize(factory_)
           @factory = factory_
         end
-        
-        
+
+
         # Parse the given binary data and return an object.
         # Raises ::RGeo::Error::ParseError on failure.
-        
+
         def parse(data_)
           if data_[0,1] =~ /[0-9a-fA-F]/
             data_ = [data_].pack('H*')
@@ -73,8 +73,8 @@ module ActiveRecord
           end
           obj_
         end
-        
-        
+
+
         def _parse_object(contained_)  # :nodoc:
           _get_byte(contained_ ? 0x69 : 0x7c)
           type_code_ = _get_integer
@@ -100,27 +100,27 @@ module ActiveRecord
             raise ::RGeo::Error::ParseError, "Unknown type value: #{type_code_}."
           end
         end
-        
-        
+
+
         def _parse_line_string  # :nodoc:
           count_ = _get_integer
           coords_ = _get_doubles(2 * count_)
           @factory.line_string((0...count_).map{ |i_| @factory.point(*coords_[2*i_,2]) })
         end
-        
-        
+
+
         def _start_scanner(data_)  # :nodoc:
           @_data = data_
           @_len = data_.length
           @_pos = 38
         end
-        
-        
+
+
         def _clean_scanner  # :nodoc:
           @_data = nil
         end
-        
-        
+
+
         def _get_byte(expect_=nil)  # :nodoc:
           if @_pos + 1 > @_len
             raise ::RGeo::Error::ParseError, "Not enough bytes left to fulfill 1 byte"
@@ -133,8 +133,8 @@ module ActiveRecord
           end
           val_
         end
-        
-        
+
+
         def _get_integer  # :nodoc:
           if @_pos + 4 > @_len
             raise ::RGeo::Error::ParseError, "Not enough bytes left to fulfill 1 integer"
@@ -143,8 +143,8 @@ module ActiveRecord
           @_pos += 4
           str_.unpack("#{@little_endian ? 'V' : 'N'}").first
         end
-        
-        
+
+
         def _get_doubles(count_)  # :nodoc:
           len_ = 8 * count_
           if @_pos + len_ > @_len
@@ -154,13 +154,13 @@ module ActiveRecord
           @_pos += len_
           str_.unpack("#{@little_endian ? 'E' : 'G'}*")
         end
-        
-        
+
+
       end
-      
-      
+
+
     end
-    
+
   end
-  
+
 end

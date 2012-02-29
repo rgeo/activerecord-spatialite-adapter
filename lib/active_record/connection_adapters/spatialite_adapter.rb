@@ -1,15 +1,15 @@
 # -----------------------------------------------------------------------------
-# 
+#
 # SpatiaLite adapter for ActiveRecord
-# 
+#
 # -----------------------------------------------------------------------------
 # Copyright 2010 Daniel Azuma
-# 
+#
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # * Redistributions of source code must retain the above copyright notice,
 #   this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above copyright notice,
@@ -18,7 +18,7 @@
 # * Neither the name of the copyright holder, nor the names of any other
 #   contributors to this software, may be used to endorse or promote products
 #   derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,16 +42,16 @@ require 'active_record/connection_adapters/sqlite3_adapter'
 # connection adapter into ActiveRecord.
 
 module ActiveRecord
-  
-  
+
+
   # ActiveRecord looks for the spatialite_connection factory method in
   # this class.
-  
+
   class Base
-    
-    
+
+
     # Create a spatialite connection adapter.
-    
+
     def self.spatialite_connection(config_)
       unless 'spatialite' == config_[:adapter]
         raise ::ArgumentError, 'adapter name should be "spatialite"'
@@ -59,20 +59,20 @@ module ActiveRecord
       unless config_[:database]
         raise ::ArgumentError, "No database file specified. Missing argument: database"
       end
-      
+
       # Allow database path relative to Rails.root, but only if
       # the database path is not the special path that tells
       # Sqlite to build a database only in memory.
       if defined?(::Rails.root) && ':memory:' != config_[:database]
         config_[:database] = ::File.expand_path(config_[:database], ::Rails.root)
       end
-      
+
       unless self.class.const_defined?(:SQLite3)
         require_library_or_gem('sqlite3')
       end
       db_ = ::SQLite3::Database.new(config_[:database], :results_as_hash => true)
       db_.busy_timeout(config_[:timeout]) unless config_[:timeout].nil?
-      
+
       # Load SpatiaLite
       path_ = config_[:libspatialite]
       if path_ && (!::File.file?(path_) || !::File.readable?(path_))
@@ -98,25 +98,25 @@ module ActiveRecord
       end
       ::ActiveRecord::ConnectionAdapters::SpatiaLiteAdapter::MainAdapter.new(db_, logger, config_)
     end
-    
-    
+
+
   end
-  
-  
+
+
   # All ActiveRecord adapters go in this namespace.
   module ConnectionAdapters
-    
+
     # The SpatiaLite Adapter
     module SpatiaLiteAdapter
-      
+
       # The name returned by the adapter_name method of this adapter.
       ADAPTER_NAME = 'SpatiaLite'.freeze
-      
+
     end
-    
+
   end
-  
-  
+
+
 end
 
 
