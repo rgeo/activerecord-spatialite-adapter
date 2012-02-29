@@ -105,7 +105,17 @@ module RGeo
               assert_nil(obj3_)
             end
 
-
+            def test_nil_spatial_column
+              klass_ = populate_ar_class(:latlon_point)
+              obj_ = klass_.new
+              assert_nil(obj_.latlon)
+              obj_.save!
+              id_ = obj_.id
+              obj2_ = klass_.find(id_)
+              assert_equal(id_, obj2_.id)
+              assert_nil(obj2_.latlon)
+            end
+            
             if ::RGeo::ActiveRecord.spatial_expressions_supported?
 
 
