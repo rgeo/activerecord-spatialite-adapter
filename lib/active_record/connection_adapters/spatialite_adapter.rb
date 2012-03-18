@@ -67,9 +67,6 @@ module ActiveRecord
         config_[:database] = ::File.expand_path(config_[:database], ::Rails.root)
       end
 
-      unless self.class.const_defined?(:SQLite3)
-        require_library_or_gem('sqlite3')
-      end
       db_ = ::SQLite3::Database.new(config_[:database], :results_as_hash => true)
       db_.busy_timeout(config_[:timeout]) unless config_[:timeout].nil?
 
