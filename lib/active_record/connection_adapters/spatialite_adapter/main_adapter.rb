@@ -192,7 +192,7 @@ module ActiveRecord
             limit_ = options_[:limit]
             options_.merge!(limit_) if limit_.is_a?(::Hash)
             type_ = (options_[:type] || info_[:type] || type_).to_s.gsub('_', '').upcase
-            null_ = options[:null].nil? ? true : options[:null]
+            null_ = options_[:null].nil? ? true : options_[:null]
             execute("SELECT AddGeometryColumn('#{quote_string(table_name_.to_s)}', '#{quote_string(column_name_.to_s)}', #{options_[:srid].to_i}, '#{quote_string(type_.to_s)}', 'XY', #{null_ ? 0 : 1})")
           else
             super

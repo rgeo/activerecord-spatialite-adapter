@@ -44,12 +44,12 @@
   s_.rubyforge_project = 'virtuoso'
   s_.required_ruby_version = '>= 1.8.7'
   s_.files = ::Dir.glob("lib/**/*.{rb,rake}") +
-    ::Dir.glob("test/**/*.rb") +
+    ::Dir.glob("test/**/*.{rb,txt}") +
     ::Dir.glob("*.rdoc") +
     ['Version']
   s_.extra_rdoc_files = ::Dir.glob("*.rdoc")
   s_.test_files = ::Dir.glob("test/**/tc_*.rb")
   s_.platform = ::Gem::Platform::RUBY
   s_.add_dependency('rgeo-activerecord', '~> 0.4.3')
-  s_.add_dependency('sqlite3', '>= 1.3.3')
+  s_.add_dependency('sqlite3', '>= 1.3.5')
 end
