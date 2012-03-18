@@ -1,0 +1,6 @@
+adapter: spatialite
+encoding: utf8
+database: tmp/spatialite_test.db
+
+# Update and uncomment the path below with your libspatialite location   
+# libspatialite: /usr/local/lib/libspatialite.dylib
