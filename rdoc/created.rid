@@ -1,0 +1,12 @@
+Mon, 18 Jun 2012 11:36:00 -0700
+lib/active_record/connection_adapters/spatialite_adapter/arel_tosql.rb	Wed, 22 Feb 2012 13:03:18 -0800
+lib/active_record/connection_adapters/spatialite_adapter/main_adapter.rb	Sat, 17 Mar 2012 22:07:07 -0700
+lib/active_record/connection_adapters/spatialite_adapter/native_format_parser.rb	Wed, 22 Feb 2012 13:03:18 -0800
+lib/active_record/connection_adapters/spatialite_adapter/railtie.rb	Wed, 22 Feb 2012 13:03:18 -0800
+lib/active_record/connection_adapters/spatialite_adapter/spatial_column.rb	Wed, 22 Feb 2012 13:03:18 -0800
+lib/active_record/connection_adapters/spatialite_adapter/spatial_table_definition.rb	Wed, 22 Feb 2012 13:03:18 -0800
+lib/active_record/connection_adapters/spatialite_adapter/version.rb	Wed, 22 Feb 2012 13:03:18 -0800
+lib/active_record/connection_adapters/spatialite_adapter.rb	Sat, 17 Mar 2012 22:52:40 -0700
+lib/rgeo/active_record/spatialite_adapter/railtie.rb	Wed, 22 Feb 2012 13:03:18 -0800
+History.rdoc	Sat, 17 Mar 2012 22:30:40 -0700
+README.rdoc	Mon, 18 Jun 2012 11:20:22 -0700
