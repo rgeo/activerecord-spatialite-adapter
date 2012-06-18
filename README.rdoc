@@ -194,7 +194,7 @@ indexes. Note that this adapter is not yet well tested.
 
 === Development and support
 
-Documentation is available at http://virtuoso.rubyforge.org/activerecord-spatialite-adapter/README_rdoc.html
+Documentation is available at http://dazuma.github.com/activerecord-spatialite-adapter/rdoc
 
 Source code is hosted on Github at http://github.com/dazuma/activerecord-spatialite-adapter
 
