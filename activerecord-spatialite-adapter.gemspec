@@ -37,7 +37,7 @@
   s_.name = 'activerecord-spatialite-adapter'
   s_.summary = 'An ActiveRecord adapter for SpatiaLite, based on RGeo.'
   s_.description = "This is an ActiveRecord connection adapter for the SpatiaLite extension to the Sqlite3 database. It is based on the stock sqlite3 adapter, but provides built-in support for spatial databases using SpatiaLite. It uses the RGeo library to represent spatial data in Ruby."
-  s_.version = "#{::File.read('Version').strip}.build#{::Time.now.utc.strftime('%Y%m%d%H%M%S')}"
+  s_.version = "#{::File.read('Version').strip}.nonrelease"
   s_.author = 'Daniel Azuma'
   s_.email = 'dazuma@gmail.com'
   s_.homepage = "http://dazuma.github.com/activerecord-spatialite-adapter"
