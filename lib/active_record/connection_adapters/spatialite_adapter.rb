@@ -76,10 +76,11 @@ module ActiveRecord
         raise "Cannot read libspatialite library at #{path_}"
       end
       unless path_
-        prefixes_ = ['/usr/local/spatialite', '/usr/local/libspatialite', '/usr/local', '/opt/local', '/sw/local', '/usr']
+        prefixes_ = ['/usr/local/spatialite/lib', '/usr/local/libspatialite/lib',
+                    '/usr/local/lib', '/opt/local/lib', '/sw/local/lib', '/usr/lib/x86_64-linux-gnu']
         suffixes_ = ['so', 'dylib'].join(',')
         prefixes_.each do |prefix_|
-          pa_ = ::Dir.glob("#{prefix_}/lib/libspatialite.{#{suffixes_}}")
+          pa_ = ::Dir.glob("#{prefix_}/libspatialite.{#{suffixes_}}")
           if pa_.size > 0
             path_ = pa_.first
             break
