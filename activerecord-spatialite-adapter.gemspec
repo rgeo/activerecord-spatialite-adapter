@@ -50,6 +50,6 @@
   s_.extra_rdoc_files = ::Dir.glob("*.rdoc")
   s_.test_files = ::Dir.glob("test/**/tc_*.rb")
   s_.platform = ::Gem::Platform::RUBY
-  s_.add_dependency('rgeo-activerecord', '~> 4.0.0')
+  s_.add_dependency('rgeo-activerecord', '~> 1.0.0')
   s_.add_dependency('sqlite3', '>= 1.3.5')
 end
