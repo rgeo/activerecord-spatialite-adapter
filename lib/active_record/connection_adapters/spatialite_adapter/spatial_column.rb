@@ -43,7 +43,7 @@ module ActiveRecord
     module SpatiaLiteAdapter
 
 
-      class SpatialColumn < ConnectionAdapters::SQLiteColumn
+      class SpatialColumn < ConnectionAdapters::SQLite3Column
 
 
         FACTORY_SETTINGS_CACHE = {}
